@@ -10,6 +10,34 @@ const Home = () => {
     const [image, setImage] = useState(null);
     const [type, setType] = useState(Camera.Constants.Type.back);
 
+    const createFormData = (uri) => {
+        const data = new FormData();
+
+        data.append("file", {
+            uri: uri,
+        });
+        console.log(data);
+        return data;
+    };
+
+    handleUploadPhoto = (image) => {
+        fetch("http://127.0.0.1:5000/translate", {
+            method: "POST",
+            body: createFormData(image),
+            headers: {
+                "content-type": "multipart/form-data",
+            },
+        })
+            // .then((response) => response.json())
+            .then((response) => {
+                console.log("Upload Succes", response);
+                setImage(null);
+            })
+            .catch((error) => {
+                console.log("Upload Error", error);
+            });
+    };
+
     const pickImageFromGallery = async () => {
         const {
             granted,
@@ -19,7 +47,7 @@ const Home = () => {
             let result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.All,
                 allowsEditing: true,
-                aspect: [4, 3],
+                aspect: [3, 2],
                 quality: 1,
             });
 
@@ -27,6 +55,7 @@ const Home = () => {
 
             if (!result.cancelled) {
                 setImage(result.uri);
+                handleUploadPhoto(result.uri);
             }
         } else {
             Alert.alert("you need to give up permission to work");
@@ -42,6 +71,7 @@ const Home = () => {
 
             if (!result.cancelled) {
                 setImage(result.uri);
+                handleUploadPhoto(result.uri);
             }
         } else {
             Alert.alert("you need to give up permission to work");
