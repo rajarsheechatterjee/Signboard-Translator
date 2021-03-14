@@ -1,183 +1,183 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Image, Alert, Dimensions, Text } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { Camera } from "expo-camera";
-import { Button, TouchableRipple, Appbar } from "react-native-paper";
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Image, Alert, Dimensions, Text } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { Camera } from 'expo-camera';
+import { Button, TouchableRipple, Appbar } from 'react-native-paper';
 
-const screenWidth = Dimensions.get("window").width;
+const screenWidth = Dimensions.get('window').width;
 
 const Home = () => {
-    const [image, setImage] = useState(null);
-    const [type, setType] = useState(Camera.Constants.Type.back);
+  const [image, setImage] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
 
-    const createFormData = (uri) => {
-        const data = new FormData();
+  const createFormData = (uri) => {
+    const data = new FormData();
 
-        data.append("file", {
-            uri: uri,
-        });
-        console.log(data);
-        return data;
-    };
+    data.append('file', {
+      uri: uri,
+      type: 'image/jpeg',
+      name: 'photo.jpg',
+    });
+    console.log(data);
+    return data;
+  };
 
-    handleUploadPhoto = (image) => {
-        fetch("http://127.0.0.1:5000/translate", {
-            method: "POST",
-            body: createFormData(image),
-            headers: {
-                "content-type": "multipart/form-data",
-            },
-        })
-            // .then((response) => response.json())
-            .then((response) => {
-                console.log("Upload Succes", response);
-                setImage(null);
-            })
-            .catch((error) => {
-                console.log("Upload Error", error);
-            });
-    };
+  handleUploadPhoto = (image) => {
+    fetch('http://127.0.0.1:5000/translate', {
+      method: 'POST',
+      body: createFormData(image),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      // .then((response) => response.json())
+      .then((response) => {
+        console.log('Upload Succes', response);
+        setImage(null);
+      })
+      .catch((error) => {
+        console.log('Upload Error', error);
+      });
+  };
 
-    const pickImageFromGallery = async () => {
-        const {
-            granted,
-        } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const pickImageFromGallery = async () => {
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-        if (granted) {
-            let result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.All,
-                allowsEditing: true,
-                aspect: [3, 2],
-                quality: 1,
-            });
+    if (granted) {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [3, 2],
+        quality: 1,
+      });
 
-            console.log(result);
+      console.log(result);
 
-            if (!result.cancelled) {
-                setImage(result.uri);
-                handleUploadPhoto(result.uri);
-            }
-        } else {
-            Alert.alert("you need to give up permission to work");
-        }
-    };
+      if (!result.cancelled) {
+        setImage(result.uri);
+        handleUploadPhoto(result.uri);
+      }
+    } else {
+      Alert.alert('you need to give up permission to work');
+    }
+  };
 
-    const pickFromCamera = async () => {
-        const { status } = await Camera.requestPermissionsAsync();
+  const pickFromCamera = async () => {
+    const { status } = await Camera.requestPermissionsAsync();
 
-        if (status === "granted") {
-            let result = await camera.takePictureAsync();
-            console.log(result);
+    if (status === 'granted') {
+      let result = await camera.takePictureAsync();
+      console.log(result);
 
-            if (!result.cancelled) {
-                setImage(result.uri);
-                handleUploadPhoto(result.uri);
-            }
-        } else {
-            Alert.alert("you need to give up permission to work");
-        }
-    };
+      if (!result.cancelled) {
+        setImage(result.uri);
+        handleUploadPhoto(result.uri);
+      }
+    } else {
+      Alert.alert('you need to give up permission to work');
+    }
+  };
 
-    return (
-        <View style={styles.container}>
-            <Camera
-                style={styles.camera}
-                type={type}
-                ratio={"3:2"}
-                ref={(ref) => (camera = ref)}
-            />
+  return (
+    <View style={styles.container}>
+      <Camera
+        style={styles.camera}
+        type={type}
+        ratio={'3:2'}
+        ref={(ref) => (camera = ref)}
+      />
 
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                }}
-            >
-                <View
-                    style={{
-                        position: "absolute",
-                        backgroundColor: "rgba(255,255,255,0.3)",
-                        height: 5,
-                        width: 50,
-                        borderRadius: 50,
-                        top: 10,
-                    }}
-                />
-                <Text
-                    style={{
-                        color: "rgba(255,255,255,0.5)",
-                        position: "absolute",
-                        top: 30,
-                    }}
-                >
-                    SIGNBOARD TRANSLATOR
-                </Text>
-                <TouchableRipple
-                    style={{
-                        borderColor: "white",
-                        borderWidth: 3,
-                        marginBottom: 37,
-                        padding: 5,
-                        borderRadius: 50,
-                    }}
-                    onPress={() => pickFromCamera()}
-                >
-                    <View
-                        style={{
-                            backgroundColor: "white",
-                            width: 55,
-                            height: 55,
-                            borderRadius: 50,
-                            borderColor: "white",
-                        }}
-                    />
-                </TouchableRipple>
-                <View style={{ marginBottom: 50 }}>
-                    <Button
-                        icon="folder-multiple-image"
-                        mode="text"
-                        // style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
-                        labelStyle={{
-                            color: "rgba(255,255,255,0.5)",
-                            letterSpacing: 0,
-                        }}
-                        // uppercase={false}
-                        onPress={() => pickImageFromGallery()}
-                    >
-                        Pick From Gallery
-                    </Button>
-                </View>
-                {/* {image && (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+        }}
+      >
+        <View
+          style={{
+            position: 'absolute',
+            backgroundColor: 'rgba(255,255,255,0.3)',
+            height: 5,
+            width: 50,
+            borderRadius: 50,
+            top: 10,
+          }}
+        />
+        <Text
+          style={{
+            color: 'rgba(255,255,255,0.5)',
+            position: 'absolute',
+            top: 30,
+          }}
+        >
+          SIGNBOARD TRANSLATOR
+        </Text>
+        <TouchableRipple
+          style={{
+            borderColor: 'white',
+            borderWidth: 3,
+            marginBottom: 37,
+            padding: 5,
+            borderRadius: 50,
+          }}
+          onPress={() => pickFromCamera()}
+        >
+          <View
+            style={{
+              backgroundColor: 'white',
+              width: 55,
+              height: 55,
+              borderRadius: 50,
+              borderColor: 'white',
+            }}
+          />
+        </TouchableRipple>
+        <View style={{ marginBottom: 50 }}>
+          <Button
+            icon="folder-multiple-image"
+            mode="text"
+            // style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
+            labelStyle={{
+              color: 'rgba(255,255,255,0.5)',
+              letterSpacing: 0,
+            }}
+            // uppercase={false}
+            onPress={() => pickImageFromGallery()}
+          >
+            Pick From Gallery
+          </Button>
+        </View>
+        {/* {image && (
                     <Image
                         source={{ uri: image }}
                         style={{ height: 300, width: 400 }}
                     />
                 )} */}
-                {/* {!image && {
+        {/* {!image && {
 
                 }} */}
-            </View>
-        </View>
-    );
+      </View>
+    </View>
+  );
 };
 
 export default Home;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#000",
-        // alignItems: "center",
-        // justifyContent: "center",
-    },
-    camera: {
-        height: (3 / 2) * screenWidth,
-        width: screenWidth,
-    },
-    text: {
-        color: "white",
-        textAlign: "center",
-        padding: 5,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+    // alignItems: "center",
+    // justifyContent: "center",
+  },
+  camera: {
+    height: (3 / 2) * screenWidth,
+    width: screenWidth,
+  },
+  text: {
+    color: 'white',
+    textAlign: 'center',
+    padding: 5,
+  },
 });
