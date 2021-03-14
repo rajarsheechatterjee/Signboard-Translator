@@ -2,20 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Image, Alert, Dimensions, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'expo-camera';
-import { Button, TouchableRipple } from 'react-native-paper';
 
 import firebase from '../services/firebaseConfig';
+import { Button } from '../components/Button';
 
 const screenWidth = Dimensions.get('window').width;
 
-const Home = () => {
-  const [imageUri, setImageUri] = useState(null);
+const Home = ({ navigation }) => {
   const [type, setType] = useState(Camera.Constants.Type.back);
 
   const getFileName = (path) => {
     return path.split('/').pop();
   };
 
+  /**
+   * Upload image to firebase storage
+   */
   const handleUploadPhoto = async (imageUri) => {
     const response = await fetch(imageUri);
     const blob = await response.blob();
@@ -29,6 +31,7 @@ const Home = () => {
   };
 
   const pickImageFromGallery = async () => {
+    // Get permission to access gallery
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (granted) {
@@ -42,8 +45,10 @@ const Home = () => {
       console.log(result);
 
       if (!result.cancelled) {
-        setImageUri(result.uri);
         handleUploadPhoto(result.uri);
+        navigation.navigate('Translation', {
+          imageName: getFileName(result.uri),
+        });
       }
     } else {
       Alert.alert('you need to give up permission to work');
@@ -51,6 +56,7 @@ const Home = () => {
   };
 
   const pickFromCamera = async () => {
+    // Get permission to access camera
     const { status } = await Camera.requestPermissionsAsync();
 
     if (status === 'granted') {
@@ -58,8 +64,10 @@ const Home = () => {
       console.log(result);
 
       if (!result.cancelled) {
-        setImageUri(result.uri);
         handleUploadPhoto(result.uri);
+        navigation.navigate('Translation', {
+          imageName: getFileName(result.uri),
+        });
       }
     } else {
       Alert.alert('you need to give up permission to work');
@@ -75,76 +83,35 @@ const Home = () => {
         ref={(ref) => (camera = ref)}
       />
 
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-        }}
-      >
-        <View
-          style={{
-            position: 'absolute',
-            backgroundColor: 'rgba(255,255,255,0.3)',
-            height: 5,
-            width: 50,
-            borderRadius: 50,
-            top: 10,
-          }}
-        />
-        <Text
-          style={{
-            color: 'rgba(255,255,255,0.5)',
-            position: 'absolute',
-            top: 30,
-          }}
-        >
-          SIGNBOARD TRANSLATOR
-        </Text>
-        <TouchableRipple
-          style={{
-            borderColor: 'white',
-            borderWidth: 3,
-            marginBottom: 37,
-            padding: 5,
-            borderRadius: 50,
-          }}
-          onPress={() => pickFromCamera()}
-        >
-          <View
-            style={{
-              backgroundColor: 'white',
-              width: 55,
-              height: 55,
-              borderRadius: 50,
-              borderColor: 'white',
-            }}
-          />
-        </TouchableRipple>
-        <View style={{ marginBottom: 50 }}>
-          <Button
-            icon="folder-multiple-image"
-            mode="text"
-            // style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
-            labelStyle={{
-              color: 'rgba(255,255,255,0.5)',
-              letterSpacing: 0,
-            }}
-            // uppercase={false}
-            onPress={() => pickImageFromGallery()}
-          >
-            Pick From Gallery
-          </Button>
-        </View>
-        {/* {image && (
-                    <Image
-                        source={{ uri: image }}
-                        style={{ height: 300, width: 400 }}
-                    />
-                )} */}
-        {/* {!image && {
+      <View style={{ flex: 1 }}>
+        <View style={styles.bsIndicator} />
+        <Text style={styles.appName}>SIGNBOARD TRANSLATOR</Text>
+        <View style={styles.buttons}>
+          <View style={{ flex: 1 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                marginVertical: 15,
+              }}
+            >
+              <View style={{ flex: 1 / 2 }}>
+                <Text style={styles.langHeader}>Source Language</Text>
+                <Text style={styles.lang}>Hindi</Text>
+              </View>
 
-                }} */}
+              <View style={{ flex: 1 / 2 }}>
+                <Text style={styles.langHeader}>Translation Language</Text>
+                <Text style={styles.lang}>English</Text>
+              </View>
+            </View>
+
+            <Button label="pick from camera" onPress={() => pickFromCamera()} />
+            <Button
+              label="Pick from gallery"
+              onPress={() => pickImageFromGallery()}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -156,8 +123,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    // alignItems: "center",
-    // justifyContent: "center",
+  },
+  appName: {
+    color: 'rgba(255,255,255,0.5)',
+    position: 'absolute',
+    top: 30,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+  },
+  buttons: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 15,
+    alignItems: 'center',
+    marginTop: 30,
   },
   camera: {
     height: (3 / 2) * screenWidth,
@@ -167,5 +146,24 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     padding: 5,
+  },
+  bsIndicator: {
+    position: 'absolute',
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    height: 5,
+    width: 50,
+    borderRadius: 50,
+    top: 10,
+    alignSelf: 'center',
+  },
+  langHeader: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginBottom: 5,
+  },
+  lang: {
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 10,
   },
 });
