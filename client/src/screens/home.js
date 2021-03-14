@@ -2,42 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Image, Alert, Dimensions, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'expo-camera';
-import { Button, TouchableRipple, Appbar } from 'react-native-paper';
+import { Button, TouchableRipple } from 'react-native-paper';
+
+import firebase from '../services/firebaseConfig';
 
 const screenWidth = Dimensions.get('window').width;
 
 const Home = () => {
-  const [image, setImage] = useState(null);
+  const [imageUri, setImageUri] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
 
-  const createFormData = (uri) => {
-    const data = new FormData();
-
-    data.append('file', {
-      uri: uri,
-      type: 'image/jpeg',
-      name: 'photo.jpg',
-    });
-    console.log(data);
-    return data;
+  const getFileName = (path) => {
+    return path.split('/').pop();
   };
 
-  handleUploadPhoto = (image) => {
-    fetch('http://127.0.0.1:5000/translate', {
-      method: 'POST',
-      body: createFormData(image),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      // .then((response) => response.json())
-      .then((response) => {
-        console.log('Upload Succes', response);
-        setImage(null);
-      })
-      .catch((error) => {
-        console.log('Upload Error', error);
-      });
+  const handleUploadPhoto = async (imageUri) => {
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const imageName = getFileName(imageUri);
+
+    const ref = firebase
+      .storage()
+      .ref()
+      .child('images/' + imageName);
+    return ref.put(blob);
   };
 
   const pickImageFromGallery = async () => {
@@ -54,7 +42,7 @@ const Home = () => {
       console.log(result);
 
       if (!result.cancelled) {
-        setImage(result.uri);
+        setImageUri(result.uri);
         handleUploadPhoto(result.uri);
       }
     } else {
@@ -70,7 +58,7 @@ const Home = () => {
       console.log(result);
 
       if (!result.cancelled) {
-        setImage(result.uri);
+        setImageUri(result.uri);
         handleUploadPhoto(result.uri);
       }
     } else {

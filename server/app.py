@@ -10,9 +10,12 @@ def test():
 @app.route('/translate', methods=['POST'])
 def index():
     if request.method == 'POST':  
-        f = request.files['file']  
-        f.save(f.uri)  
-        print(f.uri)
+        # f = request.files['file']  
+        # f.save(f.uri)  
+        # print(f.uri)
+
+        # f = request.json()
+        # print(f.uri)
         return 'Image Uploaded Succesfully'
 
 if __name__ == "__main__":
