@@ -21,14 +21,14 @@ def test():
 
 @app.route('/translate', methods=['GET'])
 def index():
-    # if request.method == 'GET':  
-    #     imageUri = request.args.get('imageUri')
+    if request.method == 'GET':  
+        imageUri = request.args.get('imageUri')
 
-    #     def url_to_image(url):
-    #     	resp = urllib.request.urlopen(url)
-    #     	image = np.asarray(bytearray(resp.read()), dtype="uint8")
-    #     	image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    #     	return image
+        # def url_to_image(url):
+        # 	resp = urllib.request.urlopen(url)
+        # 	image = np.asarray(bytearray(resp.read()), dtype="uint8")
+        # 	image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+        # 	return image
         
     #     image = url_to_image(imageUri)
 
@@ -42,8 +42,9 @@ def index():
 
     #     text = pytesseract.image_to_string(img, lang = 'eng')
 
-    # return jsonify({"text": text})
-    return 'Success'
+    return jsonify({"imageUri": imageUri})
+    # return 'Success'
 
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    app.debug = True
+    app.run(host="0.0.0.0")

@@ -1,34 +1,31 @@
 import React, { useEffect } from 'react';
-import { Text } from 'react-native';
+import { Text, Button, View } from 'react-native';
 
 import firebase from '../services/firebaseConfig';
 
 const Translation = ({ route, navigation }) => {
-	const { imageName } = route.params;
+	const { imageUri } = route.params;
 
-	const getImageFromFirebase = () => {
-		// const storage = firebase.storage();
-		// const pathReference = storage
-		// 	.ref(`images/0960bd00-4310-41af-984f-e6092869004f.jpg`)
-		// 	.getDownloadURL();
+	const getTranslationFromApi = async () => {
+		const encodedUri = encodeURIComponent(imageUri);
 
-		// const encodedUri = encodeURIComponent(pathReference);
-		fetch(`http://127.0.0.1:5000/`, {
-			method: 'GET',
-			headers: {
-				'access-control-allow-origin': '*',
-				'Content-type': 'application/json;',
-			},
-		})
-			.then((response) => response.json())
-			.then((json) => console.log(json));
+		let data = await fetch(
+			`http://192.168.1.37:5000/translate?imageUri=${encodedUri}`
+		);
+		let res = await data.json();
+		console.log(res);
 	};
 
 	useEffect(() => {
-		getImageFromFirebase();
+		getTranslationFromApi();
 	}, []);
 
-	return <Text>{imageName}</Text>;
+	return (
+		<View style={{ marginTop: 60 }}>
+			<Text>{imageUri}</Text>
+			<Button title="Get image" onPress={() => getTranslationFromApi()} />
+		</View>
+	);
 };
 
 export default Translation;
