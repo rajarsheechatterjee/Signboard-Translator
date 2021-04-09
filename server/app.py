@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from langdetect import detect
+from spellchecker import SpellChecker
 import numpy as np
 import cv2
 import easyocr
@@ -38,6 +39,17 @@ def thinningAndSkeletonization(img):
     erosion = cv2.erode(img,kernel,iterations = 1)
     return erosion
 
+def spellCheck(originalText,originalTextCode):
+    if originalTextCode == 'en':
+        spell = SpellChecker()
+
+        misspelled = spell.unknown(originalText.split())
+
+        for word in misspelled:
+            originalText = originalText.replace(word, spell.correction(word))
+    
+    return originalText
+
 def translate(text,tl):
 
     URL = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl='+tl+'&dt=t&q=' + text
@@ -52,7 +64,7 @@ def index():
     if request.method == 'GET':
 
         url = request.args.get('imageUri')
-        tl = request.args.get('tl')
+        translatedTextCode = request.args.get('tl')
 
         image = urlToImage(url)
 
@@ -62,21 +74,25 @@ def index():
 
         greyscaleImage = convertToGrayscale(denoisedImage)
 
-        binarisedImage = adaptiveGaussianThresholding(greyscaleImage)
+        # binarisedImage = adaptiveGaussianThresholding(greyscaleImage)
 
         # erodedImage = thinningAndSkeletonization(binarisedImage)
 
         reader = easyocr.Reader(['hi','en'], gpu=True)
 
-        originalText = reader.readtext(binarisedImage, detail=0)
+        originalText = reader.readtext(greyscaleImage, detail=0)
 
         originalText = ' '.join(originalText)
 
         originalTextCode = detect(originalText)
 
-        translatedText = translate(originalText,tl)
+        originalText = spellCheck(originalText, originalTextCode)
 
-    return ({'originalText': originalText, 'originalTextCode': originalTextCode, 'translatedText': translatedText, 'translatedTextCode': tl  })
+        translatedText = translate(originalText, translatedTextCode)
+
+        translatedText = spellCheck(translatedText, translatedTextCode)
+
+    return ({'originalText': originalText, 'originalTextCode': originalTextCode, 'translatedText': translatedText, 'translatedTextCode': translatedTextCode  })
 
 if __name__ == '__main__':
     app.debug = True
