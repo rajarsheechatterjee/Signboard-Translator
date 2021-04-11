@@ -1,31 +1,35 @@
 {
-    "expo": {
-        "name": "Signboard Translator",
-        "slug": "signboard-translator",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "icon": "./assets/icon.png",
-        "splash": {
-            "image": "./assets/splash.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#ffffff"
-        },
-        "updates": {
-            "fallbackToCacheTimeout": 0
-        },
-        "assetBundlePatterns": ["**/*"],
-        "ios": {
-            "supportsTablet": true
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon.png",
-                "backgroundColor": "#FFFFFF"
-            },
-            "package": "com.rajarsheechatterjee.signboardtranslator"
-        },
-        "web": {
-            "favicon": "./assets/favicon.png"
-        }
-    }
+	"expo": {
+		"name": "Signboard Translator",
+		"slug": "signboard-translator",
+		"version": "0.0.3",
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"splash": {
+			"image": "./assets/splash.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff"
+		},
+		"updates": {
+			"fallbackToCacheTimeout": 0
+		},
+		"assetBundlePatterns": ["**/*"],
+		"ios": {
+			"supportsTablet": true
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#202125"
+			},
+			"package": "com.rajarsheechatterjee.signboardtranslator"
+		},
+		"androidNavigationBar": {
+			"barStyle": "light-content",
+			"backgroundColor": "#202125"
+		},
+		"web": {
+			"favicon": "./assets/favicon.png"
+		}
+	}
 }

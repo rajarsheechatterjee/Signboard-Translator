@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
 	StyleSheet,
 	View,
@@ -8,12 +8,21 @@ import {
 	Text,
 	ActivityIndicator,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'expo-camera';
-import { Modal, Provider, Portal, Checkbox } from 'react-native-paper';
+import {
+	Modal,
+	Provider,
+	Portal,
+	Checkbox,
+	Appbar,
+	Title,
+} from 'react-native-paper';
 
 import firebase from '../services/firebaseConfig';
 import { Button } from '../components/Button';
+import { theme } from '../theme/theme';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -31,7 +40,7 @@ const Home = ({ navigation }) => {
 	const showModal = () => setVisible(true);
 	const hideModal = () => setVisible(false);
 	const containerStyle = {
-		backgroundColor: 'black',
+		backgroundColor: theme.colorPrimaryDark,
 		padding: 20,
 		margin: 20,
 		borderRadius: 4,
@@ -119,17 +128,26 @@ const Home = ({ navigation }) => {
 	return (
 		<Provider>
 			<View style={styles.container}>
+				<StatusBar style="light" />
+
+				<Appbar.Header
+					dark
+					style={{ backgroundColor: theme.colorPrimaryDark }}
+				>
+					<Appbar.Action icon="translate" />
+
+					<Appbar.Content title="Signboard Translator" />
+				</Appbar.Header>
 				<Camera
 					style={styles.camera}
 					type={type}
-					ratio={'3:2'}
+					ratio={'5:4'}
 					ref={(ref) => (camera = ref)}
 				/>
-
 				<View style={{ flex: 1 }}>
 					<View style={styles.bsIndicator} />
 					<Text style={styles.appName}>
-						SIGNBOARD TRANSLATOR (v0.0.2.1)
+						SIGNBOARD TRANSLATOR ( v0.0.3 )
 					</Text>
 					<View style={styles.buttons}>
 						<View style={{ flex: 1 }}>
@@ -153,7 +171,10 @@ const Home = ({ navigation }) => {
 									>
 										Translation Language
 									</Text>
-									<Text style={styles.lang}>
+									<Text
+										style={styles.lang}
+										onPress={() => showModal()}
+									>
 										{lang.label}
 									</Text>
 								</View>
@@ -177,6 +198,9 @@ const Home = ({ navigation }) => {
 					onDismiss={hideModal}
 					contentContainerStyle={containerStyle}
 				>
+					<Title style={{ color: theme.textColorPrimary }}>
+						Translate to
+					</Title>
 					{languages.map((item, index) => (
 						<Checkbox.Item
 							key={index}
@@ -185,20 +209,21 @@ const Home = ({ navigation }) => {
 								setLang({ code: item.code, label: item.label });
 								hideModal();
 							}}
-							labelStyle={{ color: 'white' }}
+							labelStyle={{ color: theme.textColorPrimary }}
 							status={
 								lang.code === item.code
 									? 'checked'
 									: 'unchecked'
 							}
 							mode="ios"
+							color={theme.colorAccent}
 						/>
 					))}
 				</Modal>
 			</Portal>
 			<Portal>
 				<Modal visible={loading} contentContainerStyle={containerStyle}>
-					<ActivityIndicator color="#0366d6" size={50} />
+					<ActivityIndicator color={theme.colorAccent} size={50} />
 				</Modal>
 			</Portal>
 		</Provider>
@@ -210,7 +235,7 @@ export default Home;
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#000',
+		backgroundColor: theme.colorPrimaryDark,
 	},
 	appName: {
 		color: 'rgba(255,255,255,0.5)',
@@ -224,10 +249,10 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		paddingHorizontal: 15,
 		alignItems: 'center',
-		marginTop: 30,
+		marginTop: 20,
 	},
 	camera: {
-		height: (3 / 2) * screenWidth,
+		height: (5 / 4) * screenWidth,
 		width: screenWidth,
 	},
 	text: {

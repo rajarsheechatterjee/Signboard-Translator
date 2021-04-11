@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Text, Image, View, ActivityIndicator } from 'react-native';
 import * as Speech from 'expo-speech';
-import { IconButton } from 'react-native-paper';
+import { IconButton, Appbar } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
+import { theme } from '../theme/theme';
 
 const Translation = ({ route, navigation }) => {
 	const { imageUri, tl } = route.params;
 
 	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState();
+
+	const languages = {
+		en: 'English',
+		hi: 'Hindi',
+		mr: 'Marathi',
+		te: 'Telugu',
+		ta: 'Tamil',
+		kn: 'Kannada',
+		bn: 'Bengali',
+	};
 
 	const textToSpeech = (tts, languageCode) => {
 		Speech.speak(tts, { language: languageCode });
@@ -18,126 +29,162 @@ const Translation = ({ route, navigation }) => {
 		const encodedUri = encodeURIComponent(imageUri);
 
 		let data = await fetch(
-			`http://192.168.1.34:5000/translate?imageUri=${encodedUri}&tl=${tl}`
+			`http://192.168.1.37:5000/translate?imageUri=${encodedUri}&tl=${tl}`
 		);
 		console.log(
-			`http://192.168.1.34:5000/translate?imageUri=${encodedUri}&tl=${tl}`
+			`Url -> http://192.168.1.37:5000/translate?imageUri=${encodedUri}&tl=${tl}`
 		);
 		let res = await data.json();
 		setData(res);
-		setLoading(false);
-
 		console.log(res);
 	};
 
 	useEffect(() => {
-		getTranslationFromApi();
+		let mounted = true;
+
+		getTranslationFromApi().then(() => setLoading(false));
+
+		return () => (mounted = false);
 	}, []);
 
 	return (
-		<View style={{ flex: 1, backgroundColor: 'black' }}>
+		<View style={{ flex: 1, backgroundColor: theme.colorPrimary }}>
 			<StatusBar style="light" />
+			<Appbar.Header
+				dark
+				style={{ backgroundColor: theme.colorPrimaryDark }}
+			>
+				<Appbar.Action
+					icon="arrow-left"
+					onPress={() => navigation.goBack()}
+				/>
+
+				<Appbar.Content title="Translation" />
+			</Appbar.Header>
 			<Image
 				source={{ uri: imageUri }}
-				style={{
-					flex: 1,
-					justifyContent: 'center',
-				}}
+				style={{ height: 280 }}
 				resizeMode="contain"
 			/>
 			{!loading ? (
-				<View style={{ flex: 1, padding: 24 }}>
+				<View style={{ marginTop: 20 }}>
 					<View
 						style={{
-							flexDirection: 'row',
-							alignItems: 'center',
-							borderBottomWidth: 1,
-							marginBottom: 10,
-							borderBottomColor: 'grey',
+							backgroundColor: theme.colorPrimaryDark,
+							margin: 8,
+							padding: 16,
+							borderRadius: 4,
+							elevation: 3,
 						}}
 					>
-						<Text
+						<View
 							style={{
-								fontWeight: 'bold',
-								color: 'white',
-								fontSize: 18,
+								flexDirection: 'row',
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								marginBottom: 8,
 							}}
 						>
-							Original Text
+							<Text
+								style={{
+									color: theme.textColorSecondary,
+									fontSize: 18,
+								}}
+							>
+								{languages[data.originalTextCode] ??
+									languages['en']}
+							</Text>
+							<IconButton
+								icon="volume-high"
+								color={theme.textColorSecondary}
+								style={{
+									margin: 0,
+									marginRight: 8,
+								}}
+								onPress={() =>
+									textToSpeech(
+										data.originalText,
+										data.originalTextCode
+									)
+								}
+								size={22}
+							/>
+						</View>
+						<Text
+							style={{
+								color: theme.textColorPrimary,
+								fontSize: 20,
+							}}
+						>
+							{data.originalText}
 						</Text>
-						<IconButton
-							icon="text-to-speech"
-							color="white"
-							onPress={() =>
-								textToSpeech(
-									data.originalText,
-									data.originalTextCode
-								)
-							}
-						/>
 					</View>
-					<Text
-						style={{
-							fontSize: 20,
-							marginBottom: 10,
-							color: 'white',
-							marginBottom: 20,
-						}}
-						onPress={() =>
-							textToSpeech(
-								data.originalText,
-								data.originalTextCode
-							)
-						}
-					>
-						{data.originalText}
-					</Text>
-
 					<View
 						style={{
-							flexDirection: 'row',
-							alignItems: 'center',
-							borderBottomWidth: 1,
-							marginBottom: 10,
-							borderBottomColor: 'grey',
-							marginTop: 50,
+							padding: 16,
+							alignSelf: 'center',
 						}}
 					>
-						<Text
-							style={{
-								fontWeight: 'bold',
-								color: 'white',
-								fontSize: 18,
-							}}
-						>
-							Translated Text
-						</Text>
 						<IconButton
-							icon="text-to-speech"
-							color="white"
-							onPress={() =>
-								textToSpeech(
-									data.translatedText,
-									data.translatedTextCode
-								)
-							}
+							icon="google-translate"
+							color={theme.colorAccent}
+							style={{
+								margin: 0,
+								marginRight: 8,
+							}}
+							size={22}
 						/>
 					</View>
-					<Text
+					<View
 						style={{
-							fontSize: 20,
-							marginBottom: 10,
-							color: 'white',
+							backgroundColor: theme.colorPrimaryDark,
+							margin: 8,
+							padding: 16,
+							borderRadius: 4,
+							elevation: 3,
 						}}
-						onPress={() =>
-							textToSpeech(
-								data.translatedText,
-								data.translatedTextCode
-							)
-						}
 					>
-						{data.translatedText}
-					</Text>
+						<View
+							style={{
+								flexDirection: 'row',
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								marginBottom: 8,
+							}}
+						>
+							<Text
+								style={{
+									color: theme.textColorSecondary,
+									fontSize: 18,
+								}}
+							>
+								{languages[data.translatedTextCode]}
+							</Text>
+							<IconButton
+								icon="volume-high"
+								color={theme.textColorSecondary}
+								style={{
+									margin: 0,
+									marginRight: 8,
+								}}
+								onPress={() =>
+									textToSpeech(
+										data.translatedText,
+										data.translatedTextCode
+									)
+								}
+								size={22}
+							/>
+						</View>
+						<Text
+							style={{
+								color: theme.textColorPrimary,
+								fontSize: 20,
+							}}
+						>
+							{data.translatedText}
+						</Text>
+					</View>
 				</View>
 			) : (
 				<ActivityIndicator
